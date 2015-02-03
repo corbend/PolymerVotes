@@ -1,0 +1,110 @@
+<polymer-element name="poll-results-panel">
+	<link rel="import" href="../bower_components/paper-shadow/paper-shadow.html"/>
+	<link rel="import" href="../bower_components/paper-dialog/paper-action-dialog.html"/>
+	<link rel="import" href="../bower_components/paper-button/paper-button.html"/>
+	<link rel="import" href="../bower_components/paper-input/paper-input.html"/>
+	<link rel="import" href="../bower_components/paper-input/paper-autogrow-textarea.html"/>
+	<link rel="import" href="../bower_components/paper-progress/paper-progress.html"/>
+	<link rel="import" href="../bower_components/firebase-element/firebase-element.html"/>
+
+	<template>
+
+		<style shim-shadowdom>
+
+			ul {
+				padding: 0;
+				margin: 0;
+				list-style: none;
+			}
+
+			.container {
+				padding: 20px;
+			}
+
+			.panel {
+				margin-bottom: 20px;
+			}
+
+			.panel .panel-heading {
+				padding: 10px;
+				border-top-left-radius: 4px;
+				border-top-right-radius: 4px;
+				background-color: indigo;
+				color: white;
+			}
+
+			.panel .panel-body {
+				border: 1px solid #ccc;
+				border-top: none;
+				padding: 10px;
+				border-bottom-left-radius: 4px;
+				border-bottom-right-radius: 4px;
+			}
+
+			.panel .panel-footer {
+				padding: 10px;
+			}
+
+			.well {
+				padding: 20px;
+				background-color: #ccc;
+				border-radius: 4px;
+			}
+
+			li.list-group-item {
+				background: black;
+				padding: 10px;
+				color: white;
+				margin-bottom: 10px;
+				border-radius: 4px;
+			}
+
+			paper-progress {
+				width: 100%;
+			}
+
+			paper-progress.pink::shadow #activeProgress {
+      			background-color: #e91e63;
+    		}
+
+		</style>
+
+		<firebase-element id="base" location="https://dazzling-heat-916.firebaseio.com/Polls/{{pollId}}" data="{{observedQuiz}}"></firebase-element>
+
+		<paper-shadow z="1">
+			<div class="container" vertical layout>
+				<!-- <paper-action-dialog flex> -->
+					<div class="panel panel-info">
+						<div class="panel-heading">Результаты опроса: {{observedQuiz.name}}</div>
+						<div class="panel-body">
+							<h1>People vote: {{observedQuiz.polls}}</h1>
+							<ul class="list-group">
+								<template repeat="{{question in observedQuiz.questions}}">
+									<li class="list-group-item" vertical layout>
+										<div class="whell">{{question.text}}</div>
+										<paper-progress value="{{question.results || 0}}" min="0" max="100">
+										    
+										</paper-progress>
+									</li>
+								</template>
+							</ul>
+						</div>
+						<div class="panel-footer">
+							<paper-button on-click="{{cancelSession}}" raised>Back</paper-button>
+						</div>
+					</div>
+				<!-- </paper-action-dialog> -->
+			</div>
+		</paper-shadow>
+	</template>
+	<script>
+		Polymer('poll-results-panel', {
+			ready: function() {
+				this.router = document.querySelector('poll-app').router;
+			},
+			cancelSession: function() {
+				this.router.go('/');
+			}
+		})
+	</script>
+</polymer-element>

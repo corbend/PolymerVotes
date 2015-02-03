@@ -1,0 +1,130 @@
+<polymer-element name="poll-list-row" attributes="entity entity_id route_manager">
+
+	<link rel="import" href="../bower_components/paper-fab/paper-fab.html"/>
+	<link rel="import" href="../bower_components/core-icons/core-icons.html"/>
+	<template>
+	
+		<style>
+/*			.btn {
+				font-size: 14px;
+				height: 30px;
+				width: 30px;
+				margin-right: 5px;
+				margin-top: 24px;
+			}*/
+
+			paper-fab #icon {
+				height: 14px;
+				width: 14px;
+			}
+
+			.create-button {
+				background-color: #00e400;
+			}
+
+			.edit-button {
+				background-color: #22579f;
+			}
+
+			.remove-button {
+				background-color: #df009f;
+			}
+
+			.label {
+				display: inline-block;
+				border: #ccc;
+				border-radius: 4px;
+				padding: 0.2em 0.4em;
+				margin-right: 10px;
+				color: white;
+			}
+
+			.label-success {
+				background-color: #af009f;
+			}
+
+			.label-warning {
+				background-color: #af009f;
+			}
+
+			.label-danger {
+				background-color: #22579f;
+			}
+			
+			.badge {
+				color: #ccc;
+				width: 20px;
+				height: 20px;
+			}
+
+			h1 {
+				margin: 0;
+				border-bottom: 2px solid indigo;
+				margin-bottom: 10px;
+			}
+			
+			.buttons {
+				margin-top: 20px;
+			}
+
+			li {
+				background-color: white; 
+				color: #ccc;
+				border-radius: 4px;
+				border: 2px solid indigo;
+				margin-bottom: 20px;
+				padding: 10px;
+			}
+
+		</style>
+		<li class="list-group-item" flex>
+			<div class="row" layout horizontal>
+				<div flex four>
+					<h1 class="well" horizontal layout>
+						<span flex eleven center>{{entity.name}}</span>
+						<span flex one center class="badge">{{entity.polls}}</span>
+					</h1>
+					<div class="label label-success">{{entity.fromDateFormatted}} </div>
+					<div class="label label-warning">{{entity.toDateFormatted}} </div>
+					<div class="label label-danger">{{entity.timeRemainingAll}}</div>
+				</div>
+				<div class="buttons" flex one>
+					<paper-fab mini id="getSessionButton" class="btn create-button" icon="create" disabled="{{entity.ended}}" on-active="{{startSession(poll)}}">
+						New Poll</paper-fab>
+					<paper-fab mini id="editPollButton" class="btn edit-button" icon="description" on-active="{{editQuiz(entity)}}">
+						Edit Poll</paper-fab>
+					<paper-fab mini id="removePollButton" class="btn remove-button" icon="delete" on-active="{{removeQuiz(id)}}">
+						Remove Poll</paper-fab>
+				</div>
+			</div>					
+		</li>
+	</template>
+	<script>
+		(function() {
+			Polymer('poll-list-row', {
+				ready: function() {
+					var me = this;
+					this.$.getSessionButton.addEventListener('click', function() {
+						me.startSession(me.entity_id);
+					})
+
+					this.$.editPollButton.addEventListener('click', function() {
+						me.editQuiz(me.entity_id);
+					})
+
+					this.$.removePollButton.addEventListener('click', function() {
+						me.removeQuiz(me.entity_id);
+					})
+				},
+				startSession: function(id) {
+					this.route_manager.go('/polls/' + this.entity_id + '/session');
+				},
+				editQuiz: function(id) {
+					this.route_manager.go('/polls/' + this.entity_id + '/edit');
+				},	
+				removeQuiz: function(id) {
+					this.entity = null;				}	
+			})
+		})()
+	</script>
+</polymer-element>

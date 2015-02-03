@@ -1,0 +1,110 @@
+<polymer-element name="poll-list">
+
+	<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html"/>
+	<link rel="import" href="../bower_components/paper-input/paper-input.html"/>
+	<link rel="import" href="../bower_components/firebase-element/firebase-element.html"/>
+	<link rel="import" href="../bower_components/core-header-panel/core-header-panel.html"/>
+	<link rel="import" href="../bower_components/paper-button/paper-button.html"/>
+
+	<link rel="import" href="../components/poll-list-row.html"/>
+	<template>
+
+		<style>
+		
+			section {
+				color: white;
+				width: 100%;
+				height: 100%;
+				background-color: #56aaff;
+			}
+	
+			ul {
+				padding: 0;
+				margin: 0;
+				list-style: none;
+			}
+
+			li {
+				padding: 0;
+				margin: 0;
+			}
+
+			.toolbar {
+				padding: 20px;
+			}
+
+			.list-container {
+				padding: 20px;
+			}
+
+		</style>
+
+		<firebase-element id="base" location="https://dazzling-heat-916.firebaseio.com/Polls" data="{{polls}}" keys="{{keys}}" on-data-change="{{onStartData}}"></firebase-element>
+
+		<paper-shadow z="1">
+			<section vertical layout>
+				<core-header-panel  flex>
+					<div class="jumbotron" if="{{!polls.length}}">
+						<h1>Welcome to Poll Manager</h1>
+					</div>
+				</core-header-panel>
+				<div class="row list-container" >
+					<ul class="list-group" id="pollList">
+						<template repeat="{{id in keys}}">
+							<poll-list-row entity="{{polls[id]}}" entity_id="{{id}}" route_manager="{{router}}"></poll-list-row>
+						</template>
+					</ul>
+				</div>
+				<div class="row toolbar">
+					<div class="col-md-12 text-center" center layout>
+						<paper-button on-click="{{createQuiz}}" raised>
+							Create New Poll</paper-button>
+					</div>
+				</div>
+			</section>
+		</paper-shadow>
+	</template>
+	<script>
+		Polymer('poll-list', {
+			ready: function() {
+				this.router = document.querySelector('poll-app').router;
+				this.startComplete = false;
+			},
+			observe: {
+				'polls': 'onLoad'
+			},
+			onLoad: function() {
+
+				var calcTime = function(entity) {
+					var startTime = moment();
+					var endTime = moment(entity.toDate);
+
+					if (new Date().getTime() > entity.toDate) {
+						entity.ended = true;
+					}
+
+					entity.timeRemainingAll = endTime.from(startTime);
+				}
+
+				this.keys.forEach(function(key) {
+					var poll = this.polls[key];
+					poll.toDateFormatted = moment(poll.toDate).format("DD-MM-YYYY hh:mm:ss");
+					poll.fromDateFormatted = moment(poll.fromDate).format("DD-MM-YYYY hh:mm:ss");
+
+					setInterval(function() {
+						calcTime(poll);
+					}, 1000);
+					calcTime(poll);
+				}, this)
+			},	
+			onStartData: function(event, data, element) {
+				if (!this.startComplete) {
+					this.startComplete = false;
+				}
+			},
+			createQuiz: function() {
+				this.router.go('/polls/create');
+			}
+		})
+	</script>
+</polymer-element>

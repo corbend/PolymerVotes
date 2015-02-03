@@ -1,0 +1,80 @@
+<polymer-element name="poll-app">
+	<link rel="import" href="../bower_components/paper-shadow/paper-shadow.html"/>
+	<link rel="import" href="../bower_components/core-header-panel/core-header-panel.html"/>
+	<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html"/>
+	<link rel="import" href="../bower_components/core-icons/core-icons.html"/>
+	<link rel="import" href="../bower_components/paper-input/paper-input.html"/>
+	<link rel="import" href="../bower_components/paper-tabs/paper-tabs.html"/>
+	<link rel="import" href="../bower_components/paper-tabs/paper-tab.html"/>
+	<link rel="import" href="../bower_components/core-toolbar/core-toolbar.html"/>
+	<link rel="import" href="../bower_components/core-ajax/core-ajax.html"/>
+	<link rel="import" href="../bower_components/app-router/app-router.html"/>
+	<link rel="import" href="../components/poll-list.html"/>
+
+	<template>
+		<style rel="stylesheet" type="text/css">
+			core-toolbar {
+				background-color: indigo;
+				color: white;
+			}
+
+			paper-tabs.pink::shadow #selectionBar {
+			  background-color: white;
+			}
+
+			core-header-panel {
+				height: 100%;
+			}
+
+		</style>
+
+		<core-ajax url="/ajax" auto response="{{resp}}" handleAs="json"></core-ajax>
+		<core-toolbar class="medium-tall">
+			<paper-icon-button icon="menu" role="button" tabindex="0" aria-label="menu"></paper-icon-button>
+			<paper-input value="{{data}}" flex></paper-input>
+			<paper-icon-button icon="search"></paper-icon-button>
+			<paper-tabs class="bottom fit" id="tabs" selected="list" self-end>
+				<paper-tab name="list"><paper-icon-button icon="list"></paper-icon-button>LIST</paper-tab>
+				<paper-tab name="favorites"><paper-icon-button icon="grade"></paper-icon-button>FAVORITES</paper-tab>
+				<paper-tab name="donate"><paper-icon-button icon="credit-card"></paper-icon-button>DONATE</paper-tab>
+				</paper-tabs>
+		</core-toolbar>
+		<paper-shadow z="1">
+			<section vertical layout>
+				<app-router id="mainRouter">
+				    <app-route path="/polls" import="/components/poll-app.html"></app-route>
+				    <app-route path="/polls/create" import="/components/poll-create-form.html"></app-route>
+				    <app-route path="/polls/:pollId/session" import="/components/poll-session-panel.html"></app-route>
+				    <app-route path="/polls/:pollId/edit" import="/components/poll-edit-form.html"></app-route>
+				    <app-route path="/polls/:pollId/results" import="/components/poll-results-panel.html"></app-route>
+				    <app-route path="/polls/favorites" import="/components/user-favorites-panel.html"></app-route>
+				    <!-- matches everything else -->
+				    <app-route path="*" import="/components/poll-list.html"></app-route>
+				</app-router>
+			</section>
+		</paper-shadow>
+
+	</template>
+	<script>
+		(function() {
+			Polymer('poll-app', {
+				ready: function() {
+					this.$.config = {
+						name: 'Poll Manager'
+					}
+
+					this.router = this.$.mainRouter;
+					this.data = 'Enter request name';
+
+					var tabs = this.$.tabs;
+					tabs.addEventListener('core-select', function(event, element) {
+						console.log("Selected: " + tabs.selected);
+						if (tabs.selected == "favorites") {
+
+						}
+					});
+				}
+			})
+		})()
+	</script>
+</polymer-element>

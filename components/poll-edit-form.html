@@ -1,0 +1,123 @@
+<polymer-element name="poll-edit-form">
+	
+	<link rel="import" href="../bower_components/paper-shadow/paper-shadow.html"/>
+	<link rel="import" href="../bower_components/paper-dialog/paper-action-dialog.html"/>
+	<link rel="import" href="../bower_components/paper-button/paper-button.html"/>
+	<link rel="import" href="../bower_components/paper-input/paper-input.html"/>
+	<link rel="import" href="../bower_components/paper-input/paper-autogrow-textarea.html"/>
+
+	<link rel="import" href="../bower_components/firebase-element/firebase-element.html"/>
+
+	<template>
+		<style>
+			.container {
+				padding: 20px;
+			}
+
+			.panel {
+				margin-bottom: 20px;
+			}
+
+			.panel .panel-heading {
+				padding: 10px;
+				border-top-left-radius: 4px;
+				border-top-right-radius: 4px;
+				background-color: indigo;
+				color: white;
+			}
+
+			.panel .panel-body {
+				border: 1px solid #ccc;
+				border-top: none;
+				padding: 10px;
+				border-bottom-left-radius: 4px;
+				border-bottom-right-radius: 4px;
+			}
+
+			.panel .panel-footer {
+				padding: 10px;
+			}
+
+			.well {
+				padding: 20px;
+				background-color: #ccc;
+				border-radius: 4px;
+			}
+
+		</style>
+
+		<firebase-element id="base" location="https://dazzling-heat-916.firebaseio.com/Polls/{{pollId}}" data="{{editQuiz}}"></firebase-element>
+
+		<div class="container" layout vertical>
+			<div class="row">
+				<div class="panel panel-info">
+					<div class="panel-heading">Create new quiz</div>
+					<div class="panel-body container" layout vertical>
+						<form class="col-md-12 form-horizontal">
+							<div class="form-group" layout horizontal>
+								<label for="name" flex one>Название</label>
+								<paper-input id="name" name="name" value="{{editQuiz.name}}" flex two></paper-input>
+							</div>
+							<div class="form-group" layout horizontal>
+								<label for="tag" flex one>Тэг</label>
+								<paper-input class="form-control" id="tag" name="tag" value="{{editQuiz.tag}}" flex two></paper-input>
+							</div>
+							<div class="form-group" layout horizontal>
+								<label for="fromDate" flex one>Дата начала</label>
+								<paper-input class="form-control" id="fromDate" name="fromDate" value="{{editQuiz.fromDate}}" flex two></paper-input>
+							</div>
+							<div class="form-group" layout horizontal>
+								<label for="toDate" flex one>Дата конца</label>
+								<paper-input class="form-control" id="toDate" name="toDate" value="{{editQuiz.toDate}}" flex two></paper-input>
+							</div>
+						</form>
+						<form class="col-md-12 form-inline well">
+							<div class="form-group" layout horizontal>
+								<label for="text" flex one>Вопрос</label>
+								<paper-input class="form-control" id="text" name="text" value="{{newQuestion.text}}" flex two>
+							</div>
+							<paper-button class="btn btn-success" on-click="{{addQuestion}}" raised>
+								Add</paper-button>
+						</form>
+						<div class="row">
+							<ol class="col-md-12 list-group">
+								<template repeat="{{question in editQuiz.questions}}">
+									<li class="list-group-item">
+										{{question.text}}
+										<button class="btn btn-danger" on-click="{{removeQuestion(question)}}">Remove</button>
+									</li>
+								</template>
+							</ol>
+						</div>
+					</div>
+					<paper-button class="btn btn-default" on-click="{{saveQuiz}}" raised>Save</paper-button>
+					<paper-button class="btn btn-primary" on-click="{{cancelCreate}}" raised>Cancel</paper-button>
+				</div>
+			</div>
+		</div>
+	</template>
+	<script>
+		Polymer('poll-edit-form', {
+			ready: function() {
+				this.router = document.querySelector('poll-app').router;
+				this.newQuestion = {};	
+			},
+			saveQuiz: function() {
+				debugger;
+				//сохраняем новую запись в Firebase
+				this.$.base.commitProperty('questions');
+				this.router.go('/');
+			},
+			addQuestion: function() {
+				var entity = this.newQuestion;
+				var copy = {
+					text: entity.text
+				}
+				this.editQuiz.questions.push(copy);
+			},
+			cancelCreate: function() {
+				this.router.go('/');
+			}
+		})
+	</script>
+</polymer-element>

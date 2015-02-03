@@ -1,0 +1,165 @@
+<polymer-element name="poll-session-panel">
+	
+	<link rel="import" href="../bower_components/paper-shadow/paper-shadow.html"/>
+	<link rel="import" href="../bower_components/paper-dialog/paper-action-dialog.html"/>
+	<link rel="import" href="../bower_components/paper-button/paper-button.html"/>
+	<link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html"/>
+	<link rel="import" href="../bower_components/paper-input/paper-input.html"/>
+	<link rel="import" href="../bower_components/paper-input/paper-autogrow-textarea.html"/>
+	<link rel="import" href="../bower_components/firebase-element/firebase-element.html"/>
+
+	<link rel="import" href="../components/poll-answer-row.html"/>
+
+	<template>
+		<style>
+
+			ul {
+				padding: 0;
+				margin: 0;
+				list-style: none;
+			}
+
+			ui.question-list li {
+				height: 40px;
+			}
+
+			.container {
+				padding: 20px;
+			}
+
+			.panel {
+				margin-bottom: 20px;
+			}
+
+			.panel .panel-heading {
+				padding: 10px;
+				border-top-left-radius: 4px;
+				border-top-right-radius: 4px;
+				background-color: indigo;
+				color: white;
+			}
+
+			.panel .panel-body {
+				border: 1px solid #ccc;
+				border-top: none;
+				padding: 10px;
+				border-bottom-left-radius: 4px;
+				border-bottom-right-radius: 4px;
+			}
+
+			.panel .panel-footer {
+				padding: 10px;
+			}
+
+			.well {
+				padding: 20px;
+				background-color: #ccc;
+				border-radius: 4px;
+			}
+		</style>
+
+		<firebase-element id="base" location="https://dazzling-heat-916.firebaseio.com/Polls/{{pollId}}" data="{{sessionQuiz}}"></firebase-element>
+
+		<paper-shadow z="1">
+			<div class="container">
+				<div class="panel panel-info" layout vertical>
+					<div class="panel-heading">{{sessionQuiz.name}}</div>
+					<div class="panel-body">
+						<ul class="list-group question-list">
+							<template repeat="{{question in sessionQuiz.questions}}">
+								<poll-answer-row on-change="{{onSelect}}" entity="{{question}}">
+								</poll-answer-row>
+							</template>
+							<paper-button on-click="{{vote}}" raised>
+								Vote
+							</paper-button>
+						</ul>
+					</div>
+					<div class="panel-footer">
+						<paper-button on-click="{{cancelSession}}" raised>Cancel</paper-button>
+					</div>
+				</div>
+			</div>
+		</paper-shadow>
+	</template>
+
+	<script>
+		Polymer('poll-session-panel', {
+			ready: function() {
+				this.router = document.querySelector('poll-app').router;
+			},
+			observe: {
+				'selectedAnswer': 'onChange'
+			},
+			onChange: function() {
+				console.log("question change------");
+			},	
+			calculatePercentage: function(poll) {
+
+				//calculating results percentages
+				var amounts = new Array(poll.questions.length);
+				poll.answers.forEach(function(a, index) {
+					if (!amounts[a.value]) {
+						amounts[a.value] = 0;
+					}
+					amounts[a.value] += 1;
+				})
+				var sum = 0;
+				amounts.forEach(function(a) {
+					sum += a;
+				})
+				console.log("CALCULATE", amounts);
+
+				amounts.forEach(function(a, index) {
+					poll.questions[index].results = Math.floor((a/sum) * 100);
+				})
+
+				console.log(poll.questions);
+			},
+			vote: function() {
+				var me = this;
+				var selectedAnswer;
+
+				this.sessionQuiz.questions.forEach(function(v, index) {
+					if (v.selected) {
+						selectedAnswer = v;
+						selectedAnswer.index = index;
+					}
+				})
+				//TODO - paste user id
+				if (!this.sessionQuiz.answers) {
+					this.sessionQuiz.answers = [];
+				}
+
+				this.sessionQuiz.answers.push({
+					value: selectedAnswer.index
+				});
+				//TODO - use transaction API
+				this.sessionQuiz.polls = (this.sessionQuiz.polls || 0) + 1;
+				this.sessionQuiz.questions[selectedAnswer.index].selected = false;
+
+				me.calculatePercentage(this.sessionQuiz);
+
+				this.$.base.commitProperty('answers');
+				this.$.base.commitProperty('questions');
+				me.router.go('/polls/' + this.pollId + '/results');	
+
+			},
+			onSelect: function(event, selection) {
+				if (selection.selected) {
+					var collection = this.sessionQuiz.questions;
+					var selectAnswerIndex = collection.indexOf(selection);
+					collection.forEach(function(v, index) {
+						if (selectAnswerIndex != index) {
+							v.selected = false;
+						}
+					})
+				}
+
+			},
+			cancelSession: function() {
+				this.router.go('/');
+			}
+		})
+	</script>
+</polymer-element>

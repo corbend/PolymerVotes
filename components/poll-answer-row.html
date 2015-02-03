@@ -1,0 +1,36 @@
+<polymer-element name="poll-answer-row" attributes="entity">
+
+	<link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html"/>
+
+	<template>
+	
+		<style>
+		</style>
+
+		<li class="list-group-item" horizontal layout>
+			<div flex one>
+				<paper-checkbox checked="{{entity.selected}}">
+				</paper-checkbox>
+			</div>
+			<div flex five>
+				{{entity.text}}
+			</div>
+		</li>
+
+	</template>
+	<script>
+		(function() {
+			Polymer('poll-answer-row', {
+				ready: function() {
+					var me = this;
+				},
+				observe: {
+					'entity.selected': 'onCheckboxSelect'
+				},
+				onCheckboxSelect: function() {
+					this.fire('change', this.entity);
+				}
+			})
+		})()
+	</script>
+</polymer-element>
